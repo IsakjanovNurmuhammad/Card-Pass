@@ -27,6 +27,28 @@ async def card(id: int,
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Card not found"
         )
+      role = card.staff
+    if role == "teacher":
+        raise HTTPException(
+            status_code=status.HTTP_200_OK,
+            detail="Pass approved"
+        )
+    elif role == "staff":
+        raise HTTPException(
+            status_code=status.HTTP_200_OK,
+            detail="Pass approved"
+        )
+    name = card.name
+    check = Paid_check(name, db, Student)
+    if check is False:
+        raise HTTPException(
+            status_code=status.HTTP_402_PAYMENT_REQUIRED,
+            detail="You should make payment"
+        )
+    raise HTTPException(
+        status_code=status.HTTP_200_OK,
+        detail="Pass approved"
+    )
     
 
 @router.post("/create_card",response_model=CardReadSchema)
