@@ -1,4 +1,6 @@
 from fastapi import Depends, HTTPException, APIRouter, status
+
+from auth.login import get_current_admin
 from db.Database import get_db, SessionLocal
 from models.staff_model import Staff
 from schemas.schemas import StaffCreateSchema, StaffReadSchema
@@ -9,14 +11,18 @@ router = APIRouter(prefix="/staff",
 
 
 @router.get("/all_staff", response_model=List[StaffReadSchema])
-async def all_staff(db: SessionLocal = Depends(get_db)):
+async def all_staff(db: SessionLocal = Depends(get_db),
+                    login: dict = Depends(get_current_admin)
+                    ):
     staff = db.query(Staff).all()
     return staff
 
 
 @router.get("/staff/{id}", response_model=StaffReadSchema)
 async def staff(id: int,
-               db: SessionLocal = Depends(get_db)):
+               db: SessionLocal = Depends(get_db),
+                login: dict = Depends(get_current_admin)
+                ):
     staff = db.query(Staff).filter(Staff.id == id).first()
     if staff is None:
         raise HTTPException(
@@ -28,7 +34,9 @@ async def staff(id: int,
 
 @router.post("/create_staff", response_model=StaffReadSchema)
 async def create_staff(staff_schema: StaffCreateSchema,
-                      db: SessionLocal = Depends(get_db)):
+                      db: SessionLocal = Depends(get_db),
+                       login: dict = Depends(get_current_admin)
+                       ):
     model = Staff()
     model.name = staff_schema.name
     model.number = staff_schema.number
@@ -41,7 +49,9 @@ async def create_staff(staff_schema: StaffCreateSchema,
 @router.put("/change_staff", response_model=StaffReadSchema)
 async def change_staff(id: int,
                       staff_schema: StaffCreateSchema,
-                      db: SessionLocal = Depends(get_db)):
+                      db: SessionLocal = Depends(get_db),
+                       login: dict = Depends(get_current_admin)
+                       ):
     query = db.query(Staff).filter(Staff.id == id).first()
     if query is None:
         raise HTTPException(
@@ -58,7 +68,9 @@ async def change_staff(id: int,
 
 @router.delete("/delete_staff")
 async def delete_staff(id: int,
-                      db: SessionLocal = Depends(get_db)):
+                      db: SessionLocal = Depends(get_db),
+                       login: dict = Depends(get_current_admin)
+                       ):
     query = db.query(Staff).filter(Staff.id == id).first()
     if query is None:
         raise HTTPException(

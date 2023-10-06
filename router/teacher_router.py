@@ -1,4 +1,6 @@
 from fastapi import Depends, HTTPException, APIRouter, status
+
+from auth.login import get_current_admin
 from db.Database import get_db, SessionLocal
 from models.teacher_model import Teacher
 from schemas.schemas import StaffCreateSchema, StaffReadSchema
@@ -9,14 +11,18 @@ router = APIRouter(prefix="/teacher",
 
 
 @router.get("/all_teachers", response_model=List[StaffReadSchema])
-async def all_teachers(db: SessionLocal = Depends(get_db)):
+async def all_teachers(db: SessionLocal = Depends(get_db),
+                       login: dict = Depends(get_current_admin)
+                       ):
     cards = db.query(Teacher).all()
     return cards
 
 
 @router.get("/teacher/{id}", response_model=StaffReadSchema)
 async def teacher(id: int,
-               db: SessionLocal = Depends(get_db)):
+               db: SessionLocal = Depends(get_db),
+                  login: dict = Depends(get_current_admin)
+                  ):
     teacher = db.query(Teacher).filter(Teacher.id == id).first()
     if teacher is None:
         raise HTTPException(
@@ -28,7 +34,9 @@ async def teacher(id: int,
 
 @router.post("/create_teacher", response_model=StaffReadSchema)
 async def create_teacher(teacher_schema: StaffCreateSchema,
-                      db: SessionLocal = Depends(get_db)):
+                      db: SessionLocal = Depends(get_db),
+                         login: dict = Depends(get_current_admin)
+                         ):
     model = Teacher()
     model.name = teacher_schema.name
     model.number = teacher_schema.number
@@ -41,7 +49,9 @@ async def create_teacher(teacher_schema: StaffCreateSchema,
 @router.put("/change_teacher", response_model=StaffReadSchema)
 async def change_teacher(id: int,
                       teacher_schema: StaffCreateSchema,
-                      db: SessionLocal = Depends(get_db)):
+                      db: SessionLocal = Depends(get_db),
+                         login: dict = Depends(get_current_admin)
+                         ):
     query = db.query(Teacher).filter(Teacher.id == id).first()
     if query is None:
         raise HTTPException(
@@ -58,7 +68,9 @@ async def change_teacher(id: int,
 
 @router.delete("/delete_teacher")
 async def delete_teacher(id: int,
-                      db: SessionLocal = Depends(get_db)):
+                      db: SessionLocal = Depends(get_db),
+                         login: dict = Depends(get_current_admin)
+                         ):
     query = db.query(Teacher).filter(Teacher.id == id).first()
     if query is None:
         raise HTTPException(

@@ -1,4 +1,6 @@
 from fastapi import Depends, HTTPException, APIRouter, status
+
+from auth.login import get_current_admin
 from db.Database import get_db, SessionLocal
 from models.student_model import Student
 from schemas.schemas import StudentCreateSchema, StudentReadSchema
@@ -9,14 +11,18 @@ router = APIRouter(prefix="/student",
 
 
 @router.get("/all_student", response_model=List[StudentReadSchema])
-async def all_students(db: SessionLocal = Depends(get_db)):
+async def all_students(db: SessionLocal = Depends(get_db),
+                       login: dict = Depends(get_current_admin)
+                       ):
     cards = db.query(Student).all()
     return cards
 
 
 @router.get("/student/{id}", response_model=StudentReadSchema)
 async def student(id: int,
-               db: SessionLocal = Depends(get_db)):
+               db: SessionLocal = Depends(get_db),
+                  login: dict = Depends(get_current_admin)
+                  ):
     staff = db.query(Student).filter(Student.id == id).first()
     if staff is None:
         raise HTTPException(
@@ -28,7 +34,9 @@ async def student(id: int,
 
 @router.post("/create_student", response_model=StudentReadSchema)
 async def create_student(student_schema: StudentCreateSchema,
-                      db: SessionLocal = Depends(get_db)):
+                      db: SessionLocal = Depends(get_db),
+                         login: dict = Depends(get_current_admin)
+                         ):
     model = Student()
     model.name = student_schema.name
     model.paid = student_schema.paid
@@ -42,7 +50,9 @@ async def create_student(student_schema: StudentCreateSchema,
 @router.put("/change_student", response_model=StudentReadSchema)
 async def change_student(id: int,
                       student_schema: StudentCreateSchema,
-                      db: SessionLocal = Depends(get_db)):
+                      db: SessionLocal = Depends(get_db),
+                         login: dict = Depends(get_current_admin)
+                         ):
     query = db.query(Student).filter(Student.id == id).first()
     if query is None:
         raise HTTPException(
@@ -59,7 +69,9 @@ async def change_student(id: int,
 
 
 @router.patch("/change-paid")
-async def change_paid(id:int, paid: bool, db: SessionLocal = Depends(get_db)):
+async def change_paid(id:int, paid: bool, db: SessionLocal = Depends(get_db),
+                      login: dict = Depends(get_current_admin)
+                      ):
     query = db.query(Student).filter(Student.id == id).first()
     if query is None:
         raise HTTPException(
@@ -73,7 +85,9 @@ async def change_paid(id:int, paid: bool, db: SessionLocal = Depends(get_db)):
 
 @router.delete("/delete_student")
 async def delete_student(id: int,
-                      db: SessionLocal = Depends(get_db)):
+                      db: SessionLocal = Depends(get_db),
+                         login: dict = Depends(get_current_admin)
+                         ):
     query = db.query(Student).filter(Student.id == id).first()
     if query is None:
         raise HTTPException(

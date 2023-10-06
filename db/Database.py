@@ -3,7 +3,7 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 
 
 
-SQLALCHEMY_DATABASE_URL = "postgresql://postgres:5781995@localhost:5432/card-pass"
+SQLALCHEMY_DATABASE_URL = "postgresql://postgres:5781995@localhost:5432/pass-cards"
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 engine.connect()
 SessionLocal = sessionmaker(bind=engine)
