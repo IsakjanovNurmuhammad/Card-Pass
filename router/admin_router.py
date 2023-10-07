@@ -18,7 +18,7 @@ router = APIRouter(prefix="/api/admin",
 @router.post("/registr", response_model=List[AdminReadSchema])
 async def register(admin: AdminSchema,
                    db: Session = Depends(get_db),
-                   # login: dict = Depends(get_current_admin)
+                   login: dict = Depends(get_current_admin)
                    ):
     res = []
 

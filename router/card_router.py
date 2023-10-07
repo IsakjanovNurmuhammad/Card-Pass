@@ -4,7 +4,7 @@ import uuid
 
 from algorithm import check
 from fastapi import Depends, HTTPException, APIRouter, status
-
+from algorithm import checkout
 from auth.login import get_current_admin
 from db.Database import get_db, SessionLocal
 from models.card_model import CardPass
@@ -33,12 +33,11 @@ async def checkin(uuid: str,
     check(uuid, db)
 
 
-# @router.get("/checkout/{out}", response_model=CardReadSchema)
-# async def checkout(id: str,
-#                    db: SessionLocal = Depends(get_db),
-#                    login: dict = Depends(get_current_admin)):
-#     pass
-
+@router.get("/checkout/{out}", response_model=CardReadSchema)
+async def checkout(id: str,
+                   db: SessionLocal = Depends(get_db),
+                   login: dict = Depends(get_current_admin)):
+    checkout(id, db)
 
 @router.post("/create_card", response_model=CardReadSchema)
 async def create_card(card_schema: CardCreateSchema,

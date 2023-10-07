@@ -61,7 +61,7 @@ def checkout_approve(name,
             return True
 
 
-def check(id: int,
+def check(id: str,
           db):
     card = db.query(CardPass).filter(CardPass.id == id).first()
     if card is None:
@@ -110,6 +110,69 @@ def check(id: int,
             status_code=status.HTTP_402_PAYMENT_REQUIRED,
             detail="You should make payment"
         )
+    else:
+        approve = checkin_approve(card.name, db)
+        checkout = checkout_approve(card.name, db)
+        name = card.name
+        if approve and checkout is False:
+            model = CheckIn()
+            model.checkin_at = datetime.utcnow()
+            model.name = card.name
+            db.add(model)
+            db.commit()
+            raise HTTPException(
+                status_code=status.HTTP_200_OK,
+                detail="Pass approved"
+            )
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_405_METHOD_NOT_ALLOWED,
+                detail="Something went wrong"
+            )
+
+
+def checkout(id: str,
+          db):
+    card = db.query(CardPass).filter(CardPass.id == id).first()
+    if card is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Card not found"
+        )
+    role = card.staff
+    if role == "teacher":
+        approve = checkout_approve(card.name, db)
+        if approve:
+            model = CheckIn()
+            model.name = card.name
+            db.add(model)
+            db.commit()
+            raise HTTPException(
+                status_code=status.HTTP_200_OK,
+                detail="Pass approved"
+            )
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_405_METHOD_NOT_ALLOWED,
+                detail="Something went wrong"
+            )
+
+    elif role == "staff":
+        approve = checkout_approve(card.name, db)
+        if approve:
+            model = CheckIn()
+            model.name = card.name
+            db.add(model)
+            db.commit()
+            raise HTTPException(
+                status_code=status.HTTP_200_OK,
+                detail="Pass approved"
+            )
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_405_METHOD_NOT_ALLOWED,
+                detail="Something went wrong"
+            )
     else:
         approve = checkin_approve(card.name, db)
         checkout = checkout_approve(card.name, db)

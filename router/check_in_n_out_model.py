@@ -21,8 +21,8 @@ async def all_checkins(db: SessionLocal = Depends(get_db),
 
 @router.get("/checkin_by_name/{name}")
 async def checkin_by_name(name: str,
-                          db: SessionLocal = Depends(get_db),
-                          login: dict = Depends(get_current_admin)):
+                          db: SessionLocal = Depends(get_db)):
+                          #login: dict = Depends(get_current_admin)):
     checkins = db.query(CheckIn).filter(CheckIn.name == name).all()
     if checkins is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
@@ -41,7 +41,7 @@ async def all_checkouts(db: SessionLocal = Depends(get_db),
 async def checkout_by_name(name: str,
                           db: SessionLocal = Depends(get_db),
                            login: dict = Depends(get_current_admin)):
-    checkouts = db.query(CheckIn).filter(CheckIn.name == name).all()
+    checkouts = db.query(CheckOut).filter(CheckOut.name == name).all()
     if checkouts is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail="No checkouts")
